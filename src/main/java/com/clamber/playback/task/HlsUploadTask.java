@@ -6,6 +6,7 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.clamber.playback.domain.VideoPlayBack;
 import com.clamber.playback.domain.mapper.VideoPlayBackMapper;
+import com.clamber.playback.exception.ClamberException;
 import com.clamber.playback.oss.OssConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -120,7 +121,7 @@ public class HlsUploadTask {
 		record.setUpdateTime(LocalDateTime.now());
 		int rows = videoPlayBackMapper.insertSelective(record);
 		if (rows != 1) {
-			throw new IOException("入库失败，alarmId：" + alarmId);
+			throw new ClamberException("入库失败，alarmId：" + alarmId);
 		}
 
 		// 删除本地文件

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import com.clamber.playback.exception.ClamberException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -154,17 +155,17 @@ public class RtspToHlsService {
 
 	private void validateRtspUrl(String rtspUrl) {
 		if (!StringUtils.hasText(rtspUrl)) {
-			throw new IllegalArgumentException("RTSP 地址不能为空");
+			throw new ClamberException("RTSP 地址不能为空");
 		}
 		if (!rtspUrl.startsWith("rtsp://")) {
-			throw new IllegalArgumentException("必须是 rtsp:// 开头的地址");
+			throw new ClamberException("必须是 rtsp:// 开头的地址");
 		}
 
 		boolean isHikvision = HIKVISION_PATTERN.matcher(rtspUrl).matches();
 		boolean isDahua = DAHUA_PATTERN.matcher(rtspUrl).matches();
 
 		if (!isHikvision && !isDahua) {
-			throw new IllegalArgumentException(
+			throw new ClamberException(
 					"不支持的 RTSP 格式，仅支持：\n" +
 							"海康格式：rtsp://ip/Streaming/tracks/[主码流]?starttime=...&endtime=...\n" +
 							"大华格式：rtsp://ip/cam/playback?channel=x&subtype=0&starttime=yyyy_MM_dd_HH_mm_ss&endtime=yyyy_MM_dd_HH_mm_ss"
@@ -174,7 +175,7 @@ public class RtspToHlsService {
 		if (isHikvision && rtspUrl.contains("/tracks/")) {
 			String trackPart = rtspUrl.replaceAll(".*/tracks/(\\d+)\\?.*", "$1");
 			if (!trackPart.endsWith("01")) {
-				throw new IllegalArgumentException(
+				throw new ClamberException(
 						"海康仅支持主码流回放，track 号末尾必须为 01（如 101、2601），当前传入：" + trackPart
 				);
 			}
@@ -183,7 +184,7 @@ public class RtspToHlsService {
 
 	private static ProcessBuilder buildFfmpegProcess(String rtspUrl, File dir, String fullDir, long durationSeconds) throws IOException {
 		if (!dir.exists() && !dir.mkdirs()) {
-			throw new IOException("Failed to create directory: " + fullDir);
+			throw new ClamberException("Failed to create directory: " + fullDir);
 		}
 
 		List<String> cmd = new ArrayList<>(Arrays.asList(
