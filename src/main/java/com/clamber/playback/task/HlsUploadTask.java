@@ -48,11 +48,6 @@ public class HlsUploadTask {
 		this.videoPlayBackMapper = videoPlayBackMapper;
 	}
 
-	@PostConstruct
-	public void init() {
-		uploadHls();
-	}
-
 	// 每天凌晨12点执行
 	@Scheduled(cron = "0 0 0 * * ?")
 	public void uploadHls() {
@@ -116,21 +111,24 @@ public class HlsUploadTask {
 
 		log.info("alarmId {} 上传完成，m3u8 地址：{}/{}", alarmId, ossConfig.getEndpoint(), m3u8OssKey);
 
-		// 入库
-//		VideoPlayBack record = new VideoPlayBack();
-//		record.setId(String.valueOf(SNOWFLAKE.nextId()));
-//		record.setAlarmId(alarmId);
-//		record.setPlayUrl(ossConfig.getEndpoint() + "/" + m3u8OssKey);
-//		record.setCreateTime(LocalDateTime.now());
-//		record.setUpdateTime(LocalDateTime.now());
-//		videoPlayBackMapper.insertSelective(record);
+		// 入库成功后再删除本地文件
+		VideoPlayBack record = new VideoPlayBack();
+		record.setId(String.valueOf(SNOWFLAKE.nextId()));
+		record.setAlarmId(alarmId);
+		record.setPlayUrl(ossConfig.getEndpoint() + "/" + m3u8OssKey);
+		record.setCreateTime(LocalDateTime.now());
+		record.setUpdateTime(LocalDateTime.now());
+		int rows = videoPlayBackMapper.insertSelective(record);
+		if (rows != 1) {
+			throw new IOException("入库失败，alarmId：" + alarmId);
+		}
 
 		// 删除本地文件
-//		for (File tsFile : tsFiles) {
-//			tsFile.delete();
-//		}
-//		m3u8File.delete();
-//		alarmDir.delete();
+		for (File tsFile : tsFiles) {
+			tsFile.delete();
+		}
+		m3u8File.delete();
+		alarmDir.delete();
 	}
 
 	private void uploadFile(String ossKey, File file) throws IOException {

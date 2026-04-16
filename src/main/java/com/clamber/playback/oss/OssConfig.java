@@ -13,6 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OssConfig {
 
+	public String getEndpoint() {
+		return endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
+	}
+
 	@Value("${aliyun.oss.endpoint}")
 	private String endpoint;
 

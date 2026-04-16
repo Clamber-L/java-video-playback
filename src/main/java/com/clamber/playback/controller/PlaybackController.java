@@ -2,6 +2,7 @@ package com.clamber.playback.controller;
 
 import com.clamber.playback.domain.PlaybackResult;
 import com.clamber.playback.service.RtspToHlsService;
+import com.clamber.playback.task.HlsUploadTask;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +17,9 @@ public class PlaybackController {
 	@Resource
 	private RtspToHlsService service;
 
+	@Resource
+	private HlsUploadTask hlsUploadTask;
+
 	/**
 	 * 示例：
 	 * /playback/start?rtspUrl=xxx
@@ -23,5 +27,11 @@ public class PlaybackController {
 	@GetMapping("/start")
 	public PlaybackResult start(@RequestParam String rtspUrl, String alarmId) throws Exception {
 		return service.startPlayback(rtspUrl, alarmId);
+	}
+
+	@GetMapping("/upload")
+	public String triggerUpload() {
+		hlsUploadTask.uploadHls();
+		return "ok";
 	}
 }

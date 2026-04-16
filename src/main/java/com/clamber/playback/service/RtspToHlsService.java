@@ -10,6 +10,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -59,7 +60,7 @@ public class RtspToHlsService {
 
 		// 本地已有完整文件，直接返回
 		File m3u8File = new File(fullDir + "index.m3u8");
-		if (m3u8File.exists()) {
+		if (m3u8File.exists() && hasSegments(m3u8File)) {
 			log.info("本地已存在完整文件，直接返回");
 			return new PlaybackResult("local", "/hls/" + alarmId + "/index.m3u8");
 		}
@@ -80,7 +81,8 @@ public class RtspToHlsService {
 
 		File dir = new File(fullDir);
 		ProcessBuilder builder = buildFfmpegProcess(rtspUrl, dir, fullDir, durationSeconds);
-		builder.inheritIO();
+		builder.redirectErrorStream(true);
+		builder.redirectOutput(new File("/home/log/ffmpeg-" + alarmId + ".log"));
 		Process process = builder.start();
 
 		activeProcesses.put(alarmId, process);
@@ -112,6 +114,15 @@ public class RtspToHlsService {
 		if (process != null && process.isAlive()) {
 			process.destroyForcibly();
 			activeProcesses.remove(alarmId);
+		}
+	}
+
+	private boolean hasSegments(File m3u8File) {
+		try {
+			String content = new String(Files.readAllBytes(m3u8File.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+			return content.contains(".ts");
+		} catch (IOException e) {
+			return false;
 		}
 	}
 
