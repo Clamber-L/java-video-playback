@@ -1,5 +1,5 @@
 server:
-  port=9875
+  port: 9875
 camera:
   hk: rtsp://user:pass@ip:554/Streaming/tracks/101?starttime=20260413T120000Z&endtime=20260413T121000Z
   dh: rtsp://user:pass@ip:554/cam/playback?channel=1&starttime=2024_04_13_12_00_00&endtime=2024_04_13_13_00_00
@@ -9,3 +9,9 @@ aliyun:
     access-key-id: woLBmYcHyTUmcliD
     access-key-secret: 4PFQc60NSg2MMIREbwqMNSQOwUOpB9
     bucket-name: oss-zhxf-app-web-1
+spring:
+  datasource:
+    url: jdbc:mysql://rm-m5e0b22v8or3fg89dvo.mysql.rds.aliyuncs.com:3306/iot_test?useSSL=false&serverTimezone=UTC
+    username: tr_admin
+    password: mysql!Tr^zhidui+119
+    driver-class-name: com.mysql.cj.jdbc.Driver
