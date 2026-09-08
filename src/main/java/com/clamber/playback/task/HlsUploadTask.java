@@ -66,7 +66,7 @@ public class HlsUploadTask {
 	}
 
 	// 每天凌晨12点执行
-	@Scheduled(cron = "0 0 0 * * ?")
+	// @Scheduled(cron = "0 0 0 * * ?")
 	public void uploadHls() {
 		File root = new File(baseDir);
 		if (!root.exists() || !root.isDirectory()) {
